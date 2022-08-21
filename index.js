@@ -15,6 +15,6 @@ app.use(bodyParser.json())
 
 app.use('/api/medication', require('./src/routes/medication'))
 
-app.listen(port, ()=>{
+app.listen((process.env.PORT || 5000), ()=>{
     console.log("listening on " + port);
 })
