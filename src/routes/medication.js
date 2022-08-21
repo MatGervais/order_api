@@ -33,7 +33,9 @@ router.get('/:med_id', async(req,res)=>{
 router.post('/', async(req,res)=>{
     const PostMedication = req.body
 
-    const medExists = await medication.findUnique({
+    console.log(PostMedication.name);
+
+    const medExists = await medication.findFirst({
         where : {
             name: PostMedication.name
         },
@@ -43,7 +45,7 @@ router.post('/', async(req,res)=>{
     })
 
     if(medExists){
-        return res.status(400).json({
+        return res.status(400).send({
             "msg":"Ce médicament apparait déjà dans votre ordonnance"
         })
     }
@@ -51,6 +53,8 @@ router.post('/', async(req,res)=>{
     const newMedication = await medication.create({
         data : {
             ...PostMedication,
+            dosage: parseInt(PostMedication.dosage),
+            stock: parseInt(PostMedication.stock),
             renewed : new Date(PostMedication.renewed)
         }
     })
@@ -63,8 +67,9 @@ router.post('/', async(req,res)=>{
 
 
 router.delete('/:med_id', async(req,res)=>{
-    // console.log(req.params);
+    console.log(req.params);
     const id = parseInt(req.params.med_id)
+    console.log(id);
     const deleteMed = await medication.delete({
         where:{
             id
@@ -79,20 +84,20 @@ router.put("/:med_id", async(req,res)=>{
     const form = req.body
 
 
-    const medExists = await medication.findUnique({
-        where : {
-            name: form.name
-        },
-        select:{
-            name:true
-        }
-    })
+    // const medExists = await medication.findUnique({
+    //     where : {
+    //         name: form.name
+    //     },
+    //     select:{
+    //         name:true
+    //     }
+    // })
 
-    if(medExists){
-        return res.status(400).json({
-            "msg":"Un médicament a déjà ce nom dans votre ordonnance"
-        })
-    }
+    // if(medExists){
+    //     return res.status(400).json({
+    //         "msg":"Un médicament a déjà ce nom dans votre ordonnance"
+    //     })
+    // }
 
     const modifyMed = await medication.update({
         where:{
@@ -100,7 +105,9 @@ router.put("/:med_id", async(req,res)=>{
         },
         data:{
             ...form,
-            renewed: new Date(form.renewed)
+            renewed: new Date(form.renewed),
+            dosage: parseInt(form.dosage),
+            stock:parseInt(form.stock)
         }
     })
 
