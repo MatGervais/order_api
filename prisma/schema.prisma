@@ -12,9 +12,17 @@ datasource db {
 }
 
 model Medication {
-  id Int @id @default(autoincrement())
-  name String @unique
-  stock Int
-  dosage Int
-  renewed DateTime
+  id            Int @id @default(autoincrement())
+  name          String @unique
+  stock         Int
+  dosage        Int
+  renewed       DateTime
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique
+  firstname     String?
+  lastname      String?
+  password      String?
 }
