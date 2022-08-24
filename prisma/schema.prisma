@@ -23,5 +23,6 @@ model User {
   email         String  @unique
   firstname     String?
   lastname      String?
+  username      String? @unique
   password      String?
 }
