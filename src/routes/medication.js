@@ -2,15 +2,16 @@ const router = require('express').Router()
 const { PrismaClient } = require('@prisma/client')
 
 
+const {validateToken} = require('../../config/jwt')
 const {medication} = new PrismaClient()
 
-router.get('/', async (req, res)=>{
+router.get('/', validateToken, async (req, res)=>{
     const medications = await medication.findMany();
 
     res.json(medications)
 })
 
-router.get('/:med_id', async(req,res)=>{
+router.get('/:med_id', validateToken, async(req,res)=>{
     const id = parseInt(req.params.med_id)
     const oneMedication = await medication.findFirst({
         where:{
@@ -30,7 +31,7 @@ router.get('/:med_id', async(req,res)=>{
     })
 })
 
-router.post('/', async(req,res)=>{
+router.post('/', validateToken, async(req,res)=>{
     const PostMedication = req.body
 
     console.log(PostMedication.name);
@@ -66,7 +67,7 @@ router.post('/', async(req,res)=>{
 })
 
 
-router.delete('/:med_id', async(req,res)=>{
+router.delete('/:med_id', validateToken, async(req,res)=>{
     console.log(req.params);
     const id = parseInt(req.params.med_id)
     console.log(id);
@@ -79,7 +80,7 @@ router.delete('/:med_id', async(req,res)=>{
     res.json({deleteMed,"msg":"Élement supprimé"})
 })
 
-router.put("/:med_id", async(req,res)=>{
+router.put("/:med_id",validateToken, async(req,res)=>{
     const id= parseInt(req.params.med_id)
     const form = req.body
 
