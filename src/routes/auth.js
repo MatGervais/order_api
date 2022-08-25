@@ -16,7 +16,7 @@ router.post('/register', async (req, res)=>{
     })
 
     if(userExists) {
-        res.status(400).json({message:"User already registered"})
+        res.status(400).json({success : false, message:"Cette adresse mail est déjà enregistrée"})
     }
     else {
         bcrypt.hash(password, 10).then((hash)=>{
@@ -26,7 +26,7 @@ router.post('/register', async (req, res)=>{
                     password:hash
                 }
             }).then(()=>{
-                res.json({newUser,message:"User registered"})
+                res.json({newUser,success: true, message:"Vous êtes bien enregistré·e, merci !"})
             }).catch((err)=>{
                 if(err) {
                     res.status(400).json({error:err})
