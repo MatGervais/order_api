@@ -15,6 +15,8 @@ var corsOptions = {
 }
 app.use(cors(corsOptions))
 
+app.set("view engine", "ejs");
+
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(bodyParser.json())
