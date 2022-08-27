@@ -18,6 +18,12 @@ model Medication {
   renewed       DateTime
 }
 
+enum Status{
+  ACTIVE
+  PENDING
+  CLOSED
+}
+
 model User {
   id            Int     @id @default(autoincrement())
   email         String  @unique
@@ -25,4 +31,5 @@ model User {
   lastname      String?
   username      String?
   password      String?
+  isActive      Status  @default(PENDING)
 }
