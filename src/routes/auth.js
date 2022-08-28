@@ -7,6 +7,9 @@ const bcrypt = require('bcrypt')
 const {createTokens} = require('../../config/jwt')
 const sgMail = require('@sendgrid/mail')
 
+const path = require('path');
+const ejs = require("ejs");
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function fieldsEmpty(fields) {
@@ -37,24 +40,9 @@ function isEmail(email) {
 
 router.post('/register', async (req, res)=>{
     
-    // const msg = {
-    //   to: 'matgervais@hotmail.fr', // Change to your recipient
-    //   from: 'matgervais96@gmail.com', // Change to your verified sender
-    //   subject: 'Confirmation de pré-inscription',
-    //   text: 'and easy to do anywhere, even with Node.js',
-    //   html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-    // }
-    
-    // sgMail
-    //   .send(msg)
-    //   .then(() => {
-    //     console.log('Email sent')
-    //   })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
     const nbUser = await user.count()
     const {firstname, lastname, email, password} = req.body
+    let emailTemplate;
 
     const REGEX = /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,}$/
     if(nbUser > 49){
@@ -96,6 +84,37 @@ router.post('/register', async (req, res)=>{
                     }
                 }).then(()=>{
                     res.json({newUser,success: true, message:"Vous êtes bien enregistré·e, merci !"})
+                    ejs
+                        .renderFile(path.join(__dirname, "../mails/authentication/welcome.ejs"), {
+                            user_firstname: firstname,
+                            user_lastname: lastname
+                        })
+                        .then(result => {
+                            emailTemplate = result;
+                            const msg = {
+                                to: email,
+                                from: {
+                                    email: 'matgervais@yaprescription.com',
+                                    name: "YaPrescription"
+                                },
+                                subject: 'Confirmation de pré-inscription',
+                                html: emailTemplate,
+                            }
+                            return sgMail
+                                .send(msg)
+                                .then(() => {
+                                    console.log('Email sent')
+                                })
+                                .catch((error) => {
+                                    console.error(error)
+                                })
+                        })
+                        .catch(err => {
+                            res.status(400).json({
+                                message: "Error Rendering emailTemplate",
+                                error: err
+                            });
+                        });
                 }).catch((err)=>{
                     if(err) {
                         res.status(400).json({error:err})
