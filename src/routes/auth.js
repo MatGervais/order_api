@@ -136,13 +136,13 @@ router.post('/login', async (req, res)=>{
     })
 
     if(!userExists){
-        res.status(400).json({message:"User doesn't exists"})
+        res.status(400).json({success: false, message:"Ce mail n'est pas enregistré"})
     }
 
     const dbPassword = userExists.password
     bcrypt.compare(password, dbPassword).then((match)=>{
         if(!match){
-            res.status(400).json({message:"Wrong username or password"})
+            res.status(400).json({success: false, message:"Mauvaise adresse mail ou mot de passe"})
         }
         else {
             const accessToken = createTokens(userExists)
@@ -151,7 +151,7 @@ router.post('/login', async (req, res)=>{
                 maxAge: 60*60*24*30*1000,
                 httpOnly:true
             })
-            res.json("LOGGED IN")
+            res.json({success: true, message:"Vous êtes à présent connecté"})
         }
     });
 
