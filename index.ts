@@ -4,6 +4,7 @@ const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const medicationsRoutes = require('./src/routes/medication')
 const authRoutes = require('./src/routes/auth')
+import { Routes } from "./src/routes/routes";
 
 const port = process.env.PORT || 5000
 const bodyParser = require('body-parser')
@@ -23,8 +24,11 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cookieParser())
 
-app.use('/auth', authRoutes)
-app.use('/api/medication', medicationsRoutes)
+const routes = new Routes();
+routes.routes(app)
+
+// app.use('/auth', authRoutes)
+// app.use('/api/medication', medicationsRoutes)
 
 
 app.listen((process.env.PORT || 5000), ()=>{
