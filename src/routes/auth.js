@@ -25,11 +25,6 @@ function fieldsEmpty(fields) {
     return true
 }
 
-// router.get('/users', async(req,res)=>{
-//     const nbUser = await user.count()
-
-//     res.json({nbUsers:nbUser})
-// })
 
 function isEmail(email) {
     var emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -136,13 +131,17 @@ router.post('/login', async (req, res)=>{
     })
 
     if(!userExists){
-        res.status(400).json({message:"User doesn't exists"})
+        res.status(400).json({success: false, message:"Ce mail n'est pas enregistré"})
     }
 
     const dbPassword = userExists.password
+    const userStatus = userExists.isActive;
     bcrypt.compare(password, dbPassword).then((match)=>{
         if(!match){
-            res.status(400).json({message:"Wrong username or password"})
+            res.status(400).json({success: false, message:"Mauvaise adresse mail ou mot de passe"})
+        }
+        else if(userStatus !== "ACTIVE"){
+            res.status(400).json({success: false, message:"Vous n'avez pas fait valider votre compte"})
         }
         else {
             const accessToken = createTokens(userExists)
@@ -151,7 +150,7 @@ router.post('/login', async (req, res)=>{
                 maxAge: 60*60*24*30*1000,
                 httpOnly:true
             })
-            res.json("LOGGED IN")
+            res.json({token: accessToken, success: true, message:"Vous êtes à présent connecté"})
         }
     });
 
