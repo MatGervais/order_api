@@ -25,11 +25,6 @@ function fieldsEmpty(fields) {
     return true
 }
 
-// router.get('/users', async(req,res)=>{
-//     const nbUser = await user.count()
-
-//     res.json({nbUsers:nbUser})
-// })
 
 function isEmail(email) {
     var emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -140,9 +135,13 @@ router.post('/login', async (req, res)=>{
     }
 
     const dbPassword = userExists.password
+    const userStatus = userExists.isActive;
     bcrypt.compare(password, dbPassword).then((match)=>{
         if(!match){
             res.status(400).json({success: false, message:"Mauvaise adresse mail ou mot de passe"})
+        }
+        else if(userStatus !== "ACTIVE"){
+            res.status(400).json({success: false, message:"Vous n'avez pas fait valider votre compte"})
         }
         else {
             const accessToken = createTokens(userExists)

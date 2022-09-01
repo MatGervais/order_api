@@ -3,10 +3,20 @@ const { PrismaClient } = require('@prisma/client')
 
 
 const {validateToken} = require('../../config/jwt')
-const {medication} = new PrismaClient()
+const {medication, user} = new PrismaClient()
 
 router.get('/', validateToken, async (req, res)=>{
-    const medications = await medication.findMany();
+    const medications = await medication.findMany({
+        include:{
+            user: {
+                select:{
+                    firstname:true,
+                    lastname:true,
+                    email:true
+                }
+            }
+        }
+    });
 
     res.json(medications)
 })
@@ -31,10 +41,41 @@ router.get('/:med_id', validateToken, async(req,res)=>{
     })
 })
 
+router.get('/user/:user_id', validateToken, async(req,res)=>{
+    const userId = parseInt(req.params.user_id)
+    console.log("Récupération des medicaments du user : "+ userId +"...");
+
+
+    const userExists = await user.findUnique({
+        where:{
+            id: userId
+        }
+    })
+
+    if(!userExists){
+         return res.status(400).json({success: false, message:"Cet utilisateur n'existe pas"})
+    }
+
+    const userMeds = await medication.findMany({
+        where:{
+            userId
+        }
+    })
+
+    if(userMeds.length < 1){
+        return res.status(400).send({
+            message:"Vous n'avez pas de médicament enregistré"
+        })
+    }
+
+    res.json({medications: userMeds})
+    
+})
+
 router.post('/', validateToken, async(req,res)=>{
     const PostMedication = req.body
 
-    console.log(PostMedication.name);
+    console.log(PostMedication.userId);
 
     const medExists = await medication.findFirst({
         where : {
@@ -50,13 +91,19 @@ router.post('/', validateToken, async(req,res)=>{
             "msg":"Ce médicament apparait déjà dans votre ordonnance"
         })
     }
+    if(PostMedication.userId == null){
+        return res.status(400).send({
+            "msg":"Aucun user n'est renseigné !"
+        })
+    }
 
     const newMedication = await medication.create({
         data : {
             ...PostMedication,
             dosage: parseInt(PostMedication.dosage),
             stock: parseInt(PostMedication.stock),
-            renewed : new Date(PostMedication.renewed)
+            renewed : new Date(PostMedication.renewed),
+            userId : PostMedication.userId
         }
     })
 

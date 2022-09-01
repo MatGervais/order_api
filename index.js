@@ -10,8 +10,12 @@ const bodyParser = require('body-parser')
 
 
 var corsOptions = {
-  origin:"*",
-  optionsSuccessStatus: 200
+  origin:["https://www.yaprescription.com","http://localhost:3000"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 200,
+  credentials:true
+  
 }
 app.use(cors(corsOptions))
 app.use(express.static("public"));
