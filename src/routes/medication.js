@@ -74,6 +74,7 @@ router.get('/user/:user_id', validateToken, async(req,res)=>{
 
 router.post('/', validateToken, async(req,res)=>{
     const PostMedication = req.body
+    console.log("Création d'un nouveau médicament pour le user : " + PostMedication.userId);
 
     console.log(PostMedication.userId);
 
