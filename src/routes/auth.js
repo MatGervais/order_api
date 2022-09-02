@@ -123,7 +123,6 @@ router.post('/register', async (req, res)=>{
 
 router.post('/login', async (req, res)=>{
     const {email, password} = req.body
-
     const userExists = await user.findUnique({
         where:{
             email
@@ -131,26 +130,23 @@ router.post('/login', async (req, res)=>{
     })
 
     if(!userExists){
-        res.status(400).json({success: false, message:"Ce mail n'est pas enregistré"})
+        res.status(401).json({success: false, message:"Ce mail n'est pas enregistré"})
     }
 
     const dbPassword = userExists.password
     const userStatus = userExists.isActive;
     bcrypt.compare(password, dbPassword).then((match)=>{
         if(!match){
-            res.status(400).json({success: false, message:"Mauvaise adresse mail ou mot de passe"})
+            res.status(401).json({success: false, message:"Mauvaise adresse mail ou mot de passe"})
         }
         else if(userStatus !== "ACTIVE"){
-            res.status(400).json({success: false, message:"Vous n'avez pas fait valider votre compte"})
+            res.status(401).json({success: false, message:"Vous n'avez pas fait valider votre compte"})
         }
         else {
             const accessToken = createTokens(userExists)
 
-            res.cookie("accessToken", accessToken, {
-                maxAge: 60*60*24*30*1000,
-                httpOnly:true
-            })
-            res.json({token: accessToken, success: true, message:"Vous êtes à présent connecté"})
+
+            res.send({accessToken, success: true, message:"Vous êtes à présent connecté"})
         }
     });
 
