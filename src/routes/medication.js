@@ -76,8 +76,6 @@ router.post('/', validateToken, async(req,res)=>{
     const PostMedication = req.body
     console.log("Création d'un nouveau médicament pour le user : " + PostMedication.userId);
 
-    console.log(PostMedication.userId);
-
     const medExists = await medication.findFirst({
         where : {
             name: PostMedication.name
@@ -116,9 +114,7 @@ router.post('/', validateToken, async(req,res)=>{
 
 
 router.delete('/:med_id', validateToken, async(req,res)=>{
-    console.log(req.params);
     const id = parseInt(req.params.med_id)
-    console.log(id);
     const deleteMed = await medication.delete({
         where:{
             id
@@ -133,20 +129,20 @@ router.put("/:med_id",validateToken, async(req,res)=>{
     const form = req.body
 
 
-    // const medExists = await medication.findUnique({
-    //     where : {
-    //         name: form.name
-    //     },
-    //     select:{
-    //         name:true
-    //     }
-    // })
+    const medExists = await medication.findUnique({
+        where : {
+            name: form.name
+        },
+        select:{
+            name:true
+        }
+    })
 
-    // if(medExists){
-    //     return res.status(400).json({
-    //         "msg":"Un médicament a déjà ce nom dans votre ordonnance"
-    //     })
-    // }
+    if(medExists){
+        return res.status(400).json({
+            message:"Un médicament a déjà ce nom dans votre ordonnance"
+        })
+    }
 
     const modifyMed = await medication.update({
         where:{
