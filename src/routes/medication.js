@@ -138,11 +138,11 @@ router.put("/:med_id",validateToken, async(req,res)=>{
         }
     })
 
-    if(medExists){
-        return res.status(400).json({
-            message:"Un médicament a déjà ce nom dans votre ordonnance"
-        })
-    }
+    // if(medExists){
+    //     return res.status(400).json({
+    //         message:"Un médicament a déjà ce nom dans votre ordonnance"
+    //     })
+    // }
 
     const modifyMed = await medication.update({
         where:{
