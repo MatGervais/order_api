@@ -20,13 +20,17 @@ const bodyParser = require('body-parser')
   
 // }
 
-app.use(cors({
-    origin:["https://www.yaprescription.com","http://localhost:3000"],
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
-    credentials:true,
-}))
+// app.use(cors({
+//     origin:["https://www.yaprescription.com","http://localhost:3000"],
+//     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//     preflightContinue: false,
+//     optionsSuccessStatus: 200,
+//     credentials:true,
+// }))
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.use(express.static("public"));
 
 app.set("view engine", "ejs");

@@ -120,7 +120,7 @@ router.post('/register', async (req, res)=>{
         }
     }
 
-}).options(cors())
+})
 
 router.post('/login', async (req, res)=>{
     const {email, password} = req.body
