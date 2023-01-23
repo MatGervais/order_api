@@ -20,13 +20,13 @@ const bodyParser = require('body-parser')
   
 // }
 
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-  });
+app.use(cors({
+    origin:["https://www.yaprescription.com","http://localhost:3000"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    credentials:true,
+}))
 app.use(express.static("public"));
 
 app.set("view engine", "ejs");
