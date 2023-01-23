@@ -10,31 +10,24 @@ const port = process.env.PORT || 5000
 const bodyParser = require('body-parser')
 
 
-// var corsOptions = {
-//   origin:["https://www.yaprescription.com","http://localhost:3000"],
-//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-//   preflightContinue: false,
-//   optionsSuccessStatus: 200,
-//   credentials:true,
+var corsOptions = {
+  origin:"*",
+  // origin:["https://www.yaprescription.com","http://localhost:3000"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 200,
+  credentials:true  
+}
 
-  
-// }
-
-// app.use(cors({
-//     origin:["https://www.yaprescription.com","http://localhost:3000"],
-//     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-//     preflightContinue: false,
-//     optionsSuccessStatus: 200,
-//     credentials:true,
-// }))
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  // res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, Authorization');
-  // res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  // res.header("Access-control-Allow-Credentials", true)
-  next();
-});
+app.use(cors(corsOptions))
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type');
+//   // res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, Authorization');
+//   // res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+//   // res.header("Access-control-Allow-Credentials", true)
+//   next();
+// });
 app.use(express.static("public"));
 
 app.set("view engine", "ejs");
