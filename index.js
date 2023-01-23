@@ -10,15 +10,24 @@ const port = process.env.PORT || 5000
 const bodyParser = require('body-parser')
 
 
-var corsOptions = {
-  origin:["https://www.yaprescription.com","http://localhost:3000"],
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  preflightContinue: false,
-  optionsSuccessStatus: 200,
-  credentials:true
+// var corsOptions = {
+//   origin:["https://www.yaprescription.com","http://localhost:3000"],
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   preflightContinue: false,
+//   optionsSuccessStatus: 200,
+//   credentials:true,
+
   
-}
-app.use(cors(corsOptions))
+// }
+
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+  });
 app.use(express.static("public"));
 
 app.set("view engine", "ejs");
