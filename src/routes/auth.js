@@ -9,6 +9,7 @@ const sgMail = require('@sendgrid/mail')
 
 const path = require('path');
 const ejs = require("ejs");
+const cors = require('cors');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -119,7 +120,7 @@ router.post('/register', async (req, res)=>{
         }
     }
 
-})
+}).options(cors())
 
 router.post('/login', async (req, res)=>{
     const {email, password} = req.body
