@@ -1,9 +1,126 @@
 const router = require('express').Router()
 const { PrismaClient } = require('@prisma/client')
+const cron = require('cron')
+const moment = require('moment')
+const sgMail = require('@sendgrid/mail')
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 
 const {validateToken} = require('../../config/jwt')
 const {medication, user} = new PrismaClient()
+
+    async function updateMedicationStock() {
+        const allMeds = await medication.findMany()
+        
+        for (const medication of allMeds) {
+            await prisma.medication.update({
+                where: { id: medication.id },
+                data: { stock: medication.stock - medication.dosage },
+            });
+        }
+    }
+const resourceCheck = new cron.CronJob('0 0 0 */1 * *', async function () {
+    updateMedicationStock()
+}, null, true, 'Europe/Paris');
+
+// Démarrer la tâche cron
+resourceCheck.start();
+
+let depletedOnes = []
+let destinataires = []
+
+function removeDuplicates(arr) {
+    return arr.filter((item,
+        index) => arr.indexOf(item) === index);
+}
+
+async function isMedicationDepleted (req,res){
+    const medications = await medication.findMany({
+        include:{
+            user: {
+                select:{
+                    firstname:true,
+                    lastname:true,
+                    email:true
+                }
+            }
+        }
+    });
+
+    for(let i=0; i<medications.length; i++){
+        const renewed = new Date(medications[i].renewed)
+        var nbJourRestant = Math.trunc(medications[i].stock/medications[i].dosage)
+        const renew = moment(moment(renewed).add(nbJourRestant, 'days').format("YYYY-MM-DDTHH:mm:ss.SSSSZ"))._i
+        const diffTime = Math.abs(new Date(renew) - new Date());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // console.log(medications[i])
+        if(diffDays*medications[i].dosage < 26){
+            // console.log("-----",moment(new Date(medications[i].renewed).getTime()).format("DD"))
+            // console.log(medications[i].name,"+++++++",diffDays,diffDays*medications[i].dosage)
+            depletedOnes.push({
+                name:medications[i].name,
+                stock: diffDays*medications[i].dosage,
+                userId:medications[i].userId,
+                user:medications[i].user
+            })
+            // console.log(depletedOnes)
+        }
+    }
+    if(depletedOnes.length > 0){
+        
+        for(let j =0; j < depletedOnes.length; j++){
+            // console.log(depletedOnes[j]);
+            destinataires.push(depletedOnes[j].user.email)
+        }
+    }
+    // console.log(depletedOnes.length);
+    
+    if(depletedOnes.length < 0){
+        console.log(depletedOnes.length)
+    }
+    else {
+        console.log(depletedOnes.length)
+        console.log(depletedOnes)
+        for (let j = 0; j < depletedOnes; j++) {
+            const destinataires = []
+            destinataires.push(depletedOnes[j].user.email)
+
+            console.log(depletedOnes[j]);
+        }
+
+        console.log(removeDuplicates(destinataires))
+
+        // const resourceCheck = new cron.CronJob('* * * * *', function () {
+        //         // Préparer l'e-mail
+        //         const mailOptions = {
+        //             from: {
+        //                 email: 'matgervais@yaprescription.com',
+        //                 name: "YaPrescription"
+        //             },
+        //             to: removeDuplicates(destinataires),
+        //             subject: 'Rupture de médicament en vue',
+        //             text: "Il semblerait qu'un de vos médicament ne soit plsu très loin de la rupture..."
+        //         }
+
+        //         // Envoyer l'e-mail
+        //         sgMail
+        //         .send(mailOptions)
+        //         .then(() => {
+        //             console.log('Email sent to ' + removeDuplicates(destinataires))
+        //         })
+        //         .catch((error) => {
+        //             console.error(error)
+        //         })            
+        // }, null, true, 'America/Los_Angeles');
+
+        // // Démarrer la tâche cron
+        // resourceCheck.start();
+        }
+    
+}
+
+isMedicationDepleted()
 
 router.get('/', validateToken, async (req, res)=>{
     const medications = await medication.findMany({
@@ -20,6 +137,10 @@ router.get('/', validateToken, async (req, res)=>{
 
     res.json(medications)
 })
+
+
+
+
 
 router.get('/:med_id', validateToken, async(req,res)=>{
     const id = parseInt(req.params.med_id)
