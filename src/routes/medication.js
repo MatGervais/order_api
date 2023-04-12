@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient, prisma } = require('@prisma/client')
 const cron = require('cron')
 const moment = require('moment')
 const sgMail = require('@sendgrid/mail')
@@ -12,15 +12,18 @@ const {medication, user} = new PrismaClient()
 
     async function updateMedicationStock() {
         const allMeds = await medication.findMany()
-        
-        for (const medication of allMeds) {
-            await prisma.medication.update({
-                where: { id: medication.id },
-                data: { stock: medication.stock - medication.dosage },
-            });
+        for (const medicatio of allMeds) {
+            const update = await medication.updateMany({
+                where:{
+                    id: medication.id
+                },
+                data : {
+                    stock : medicatio.stock - medicatio.dosage
+                }
+            })
         }
     }
-const resourceCheck = new cron.CronJob('0 0 0 */1 * *', async function () {
+const resourceCheck = new cron.CronJob('0 0 * * *', async function () {
     updateMedicationStock()
 }, null, true, 'Europe/Paris');
 
@@ -77,19 +80,19 @@ async function isMedicationDepleted (req,res){
     // console.log(depletedOnes.length);
     
     if(depletedOnes.length < 0){
-        console.log(depletedOnes.length)
+        // console.log(depletedOnes.length)
     }
     else {
-        console.log(depletedOnes.length)
-        console.log(depletedOnes)
+        // console.log(depletedOnes.length)
+        // console.log(depletedOnes)
         for (let j = 0; j < depletedOnes; j++) {
             const destinataires = []
             destinataires.push(depletedOnes[j].user.email)
 
-            console.log(depletedOnes[j]);
+            // console.log(depletedOnes[j]);
         }
 
-        console.log(removeDuplicates(destinataires))
+        // console.log(removeDuplicates(destinataires))
 
         // const resourceCheck = new cron.CronJob('* * * * *', function () {
         //         // Préparer l'e-mail
@@ -134,7 +137,7 @@ router.get('/', validateToken, async (req, res)=>{
             }
         }
     });
-
+    // console.log(medications);
     res.json(medications)
 })
 
@@ -172,23 +175,23 @@ router.get('/user/:user_id', validateToken, async(req,res)=>{
             id: userId
         }
     })
-
+    
     if(!userExists){
-         return res.status(400).json({success: false, message:"Cet utilisateur n'existe pas"})
+        return res.status(400).json({success: false, message:"Cet utilisateur n'existe pas"})
     }
-
+    
     const userMeds = await medication.findMany({
         where:{
             userId
         }
     })
+    console.log(userMeds)
 
     if(userMeds.length < 1){
         return res.status(400).send({
             message:"Vous n'avez pas de médicament enregistré"
         })
     }
-
     res.json({medications: userMeds})
     
 })
